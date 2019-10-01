@@ -34,7 +34,9 @@ config :nostrum,
   num_shards: :auto
 
 config :manpagebot,
-  prefix: "!man"
+  prefix: "!man",
+  manpage_html_url_base: "http://manpages.ubuntu.com/manpages/bionic/en",
+  manpage_gz_url_base: "http://manpages.ubuntu.com/manpages.gz/bionic/en"
 
 config :logger,
   level: :info

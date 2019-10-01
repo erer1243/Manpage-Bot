@@ -1,4 +1,4 @@
-defmodule Manpagebot.MixProject do
+defmodule ManpageBot.MixProject do
   use Mix.Project
 
   def project do
@@ -23,6 +23,8 @@ defmodule Manpagebot.MixProject do
   defp deps do
     [
       {:nostrum, "~> 0.4"},
+      {:httpoison, "~> 1.6.0"},
+      {:stream_gzip, "~> 0.4"},
 
       # Earliest version that fixes this issue
       # https://github.com/benoitc/hackney/issues/591
