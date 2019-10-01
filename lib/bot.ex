@@ -33,8 +33,8 @@ defmodule ManpageBot.Bot do
   ```
   """
 
-  def parse_search(message) do
-    words = String.split(message)
+  def parse_and_do_search(message) do
+    words = message |> String.split() |> Enum.uniq()
 
     if length(words) == 2 do
       num = hd(words)
@@ -42,16 +42,18 @@ defmodule ManpageBot.Bot do
 
       case Integer.parse(num) do
         {s, ""} when s >= 1 and s <= 9 ->
-          [ManpageBot.Lookup.man(s, name)]
+          [ManpageBot.Lookup.man(name, s)]
 
         {_s, _remainder} ->
           [{:error, "section must be between 1 and 9"}]
 
+        # If there is an integer parse error,
+        # we probably just have two manpage names
         _error ->
-          Enum.map(words, &ManpageBot.Lookup.man/1)
+          ManpageBot.Lookup.man_multiple(words)
       end
     else
-      Enum.map(words, &ManpageBot.Lookup.man/1)
+      ManpageBot.Lookup.man_multiple(words)
     end
   end
 
@@ -60,8 +62,27 @@ defmodule ManpageBot.Bot do
       [result | rest] ->
         msg =
           case result do
-            {:ok, desc, url} -> "#{desc} #{url}"
-            {:error, msg} -> "Error: #{msg}"
+            {:ok, desc, url} ->
+              "#{url}\n" <>
+                cond do
+                  String.length(desc) == 0 ->
+                    "(no description found)"
+
+                  String.length(desc) > 1800 ->
+                    trimmed =
+                      desc
+                      |> String.codepoints()
+                      |> Enum.take(1800)
+                      |> Enum.into("")
+
+                    "```#{trimmed}```... (description too long)"
+
+                  true ->
+                    "```#{desc}```"
+                end
+
+            {:error, msg} ->
+              "Error: #{msg}"
           end
 
         [msg | parse_search_results(rest)]
@@ -83,10 +104,11 @@ defmodule ManpageBot.Bot do
           send.(@help_message)
         else
           {:ok, reply} = send.("Searching")
-          results = body |> parse_search() |> parse_search_results()
+          results = body |> parse_and_do_search() |> parse_search_results()
 
           Api.edit_message(reply, content: hd(results))
           Enum.map(tl(results), send)
+          # Enum.map(results, send)
         end
 
       _ ->

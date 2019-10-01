@@ -1,11 +1,25 @@
 defmodule ManpageBot.Lookup do
+  require Logger
+
   # Public functions
   def man(name) do
-    search_manpage(name, 1, true)
+    Logger.info("START  man #{name}")
+    res = search_manpage(name, 1, true)
+    Logger.info("FINISH man #{name}")
+    res
   end
 
   def man(name, section) do
-    search_manpage(name, section, false)
+    Logger.info("START  man #{section} #{name}")
+    res = search_manpage(name, section, false)
+    Logger.info("FINISH man #{section} #{name}")
+    res
+  end
+
+  def man_multiple(names) do
+    names
+    |> Enum.map(&Task.async(fn -> man(&1) end))
+    |> Enum.map(&Task.await/1)
   end
 
   # Private functions
@@ -14,13 +28,13 @@ defmodule ManpageBot.Lookup do
       {:ok, resp} ->
         case resp.status_code do
           200 ->
-            {:ok, "description here", html_url(name, section)}
+            {:ok, get_description(resp.body), html_url(name, section)}
 
           404 ->
             if continue do
               search_manpage(name, section + 1, true)
             else
-              {:error, "manpage \"#{name}\" not found in section #{section}"}
+              {:error, "no manual entry for #{name} in section #{section}"}
             end
 
           n ->
@@ -49,7 +63,11 @@ defmodule ManpageBot.Lookup do
     gz
     |> String.codepoints()
     |> StreamGzip.gunzip()
-    |> Enum.take(1500)
     |> Enum.into("")
+    |> String.split("\n")
+    |> Enum.drop_while(&(not String.match?(&1, ~r/\.S[hH] DESCRIPTION/)))
+    |> Enum.drop(1)
+    |> Enum.take_while(&(not String.match?(&1, ~r/\.S[hH].+/)))
+    |> Enum.join("\n")
   end
 end
