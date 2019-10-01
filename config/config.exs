@@ -33,5 +33,8 @@ config :nostrum,
   token: System.get_env("BOT_TOKEN"),
   num_shards: :auto
 
+config :manpagebot,
+  prefix: "!man"
+
 config :logger,
   level: :info
