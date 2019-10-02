@@ -1,21 +1,31 @@
-# Manpagebot
+NAME
+====
+Manpage Bot - a Discord-based interface to
+              the Ubuntu manpage repo
 
-**TODO: Add description**
+SYNOPSIS
+========
+!man MANPAGE...
 
-## Installation
+!man SECTION MANPAGE
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `manpagebot` to your list of dependencies in `mix.exs`:
+DESCRIPTION
+===========
+Manpage Bot (MB for short) is a simple bot
+that looks up and parses manpages from the
+Ubuntu manpage repo.
 
-```elixir
-def deps do
-  [
-    {:manpagebot, "~> 0.1.0"}
-  ]
-end
-```
+Given one or more MANPAGE, MB will print
+the description section of the MANPAGE(s)
+and provide a URL to an online HTML version.
+Like the regular man command, sections are
+searched in order and the first found
+manpage is shown.
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/manpagebot](https://hexdocs.pm/manpagebot).
+Given a SECTION and a MANPAGE, MB will
+print the MANPAGE in that SECTION (if it
+exists), instead of searching.
 
+AUTHOR
+======
+Written by erer1243 \#3478
