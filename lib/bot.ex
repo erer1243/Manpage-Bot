@@ -19,7 +19,8 @@ defmodule ManpageBot.Bot do
     Ubuntu manpage repo.
 
     Given one or more MANPAGE, MB will print
-    the description section of the MANPAGE(s).
+    the description section of the MANPAGE(s)
+    and provide a URL to an online HTML version.
     Like the regular man command, sections are
     searched in order and the first found
     manpage is shown.
@@ -96,7 +97,7 @@ defmodule ManpageBot.Bot do
 
                   # Trim the manpage description if needed
                   String.length(desc) > 1700 ->
-                    "```#{String.slice(desc, 0..1700)}\n... (description too long)```"
+                    "```#{String.slice(desc, 0..1700)}\n(description truncated)```"
 
                   # Have an okay description, no special treatment
                   true ->
@@ -112,9 +113,7 @@ defmodule ManpageBot.Bot do
     end
   end
 
-  @doc """
-  Nostrum callback implementation that handles new messages.
-  """
+  @doc "Nostrum callback implementation that handles new messages."
   def handle_event({:MESSAGE_CREATE, msg, _ws_state}) do
     send = &Api.create_message(msg.channel_id, &1)
 
@@ -140,6 +139,7 @@ defmodule ManpageBot.Bot do
     end
   end
 
+  @doc "Nostrum callback to ignore all other events."
   def handle_event(_), do: :ignore
   def start_link, do: Consumer.start_link(__MODULE__, name: __MODULE__)
 end

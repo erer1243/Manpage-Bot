@@ -2,14 +2,18 @@ defmodule ManpageBot.Lookup do
   require Logger
 
   # Public functions
+  # ================
+  @doc "Searches for a manpage in all sections, returing the first found."
   def man(name), do: search_manpage(name, 1, true)
+  @doc "Searches for a manpage in the given section."
   def man(name, section), do: search_manpage(name, section, false)
 
+  @doc "Asynchronously searches for manpages in all sections."
   def man_multiple(names) do
     names
     |> Enum.map(&Task.async(fn -> man(&1) end))
     |> Task.yield_many(8000)
-    # Read about what Task.yield_many may return:
+    # About what Task.yield_many may return:
     # https://hexdocs.pm/elixir/Task.html#yield_many/2
     |> Enum.map(fn {task, result} ->
       Task.shutdown(task, :brutal_kill)
@@ -23,6 +27,15 @@ defmodule ManpageBot.Lookup do
   end
 
   # Private functions
+  # =================
+  # Given a manpage name and section, checks remote for a matching
+  # manpage. If the page is not found and continue is true, try the
+  # same name in section + 1. Returns an error if sections are exhausted.
+  # If the page is not found and continue is false, returns an error.
+  #
+  # returns a result that is either
+  # {:ok, <manpage description>, <manpage html url>} or
+  # {:error, <error message>}
   defp search_manpage(name, section, continue) when section <= 9 do
     case HTTPoison.get(gz_url(name, section)) do
       {:ok, resp} ->
@@ -59,29 +72,29 @@ defmodule ManpageBot.Lookup do
   @gz_url_base Application.get_env(:manpagebot, :manpage_gz_url_base)
   @html_url_base Application.get_env(:manpagebot, :manpage_html_url_base)
 
+  # Formats a url for a gzip manpage
   defp gz_url(name, section) do
     "#{@gz_url_base}/man#{section}/#{name}.#{section}.gz"
   end
 
+  # Formats a url for an HTML manpage
   defp html_url(name, section) do
     "#{@html_url_base}/man#{section}/#{name}.#{section}.html"
   end
 
-  @doc """
-  Given the gzipped manpage from the remote source,
-  gunzip and parse it.
-
-  returns a result which is either
-  {:ok, <description>}
-  {:error, <error message>}
-  """
+  # Given the gzipped manpage from the remote source,
+  # gunzip and parse it.
+  #
+  # returns a result which is either
+  # {:ok, <description>} or
+  # {:error, <error message>}
   defp get_description(gz) do
     raw = gz |> String.codepoints() |> StreamGzip.gunzip()
     nlines = raw |> Enum.into("") |> String.split("\n") |> length
 
     # Porcelain can't close stdin, so the command must be made to expect one line
-    # https://github.com/alco/porcelain/issues/37
     # https://hexdocs.pm/porcelain/Porcelain.Driver.Basic.html
+    # ==========================================================================
     # Potential BUG: nlines-1 prevents the last line from being read.
     # If the last line pertains to the description, it'll be left out.
     # It seems like the description would never include the last line, though.
