@@ -92,7 +92,7 @@ defmodule ManpageBot.Lookup do
     raw = gz |> String.codepoints() |> StreamGzip.gunzip()
     nlines = raw |> Enum.into("") |> String.split("\n") |> length
 
-    # Porcelain can't close stdin, so the command must be made to expect one line
+    # Porcelain can't close stdin, so the command must be made to expect n lines
     # https://hexdocs.pm/porcelain/Porcelain.Driver.Basic.html
     # ==========================================================================
     # Potential BUG: nlines-1 prevents the last line from being read.
