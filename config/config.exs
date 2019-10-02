@@ -29,14 +29,17 @@ use Mix.Config
 #
 #     import_config "#{Mix.env()}.exs"
 
-config :nostrum,
-  token: System.get_env("BOT_TOKEN"),
-  num_shards: :auto
-
 config :manpagebot,
   prefix: "!man",
   manpage_html_url_base: "http://manpages.ubuntu.com/manpages/bionic/en",
   manpage_gz_url_base: "http://manpages.ubuntu.com/manpages.gz/bionic/en"
+
+config :nostrum,
+  token: System.get_env("BOT_TOKEN"),
+  num_shards: :auto
+
+config :porcelain,
+  driver: Porcelain.Driver.Basic
 
 config :logger,
   level: :info

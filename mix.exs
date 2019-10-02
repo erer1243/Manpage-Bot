@@ -25,6 +25,7 @@ defmodule ManpageBot.MixProject do
       {:nostrum, "~> 0.4"},
       {:httpoison, "~> 1.6.0"},
       {:stream_gzip, "~> 0.4"},
+      {:porcelain, "~> 2.0"},
 
       # Earliest version that fixes this issue
       # https://github.com/benoitc/hackney/issues/591
