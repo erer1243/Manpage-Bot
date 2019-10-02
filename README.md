@@ -1,3 +1,9 @@
+COULD BE ADDED
+===========
+* Manpage lookup rate limiting (i.e. worker pool)
+* Maybe built-in manpage parsing but that sounds hard
+* Tests but probably not because who cares
+
 NAME
 ====
 Manpage Bot - a Discord-based interface to
